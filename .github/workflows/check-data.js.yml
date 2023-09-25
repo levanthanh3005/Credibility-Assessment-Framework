@@ -32,3 +32,5 @@ jobs:
       run: find . -maxdepth 4 -name package.json -exec sh -c 'for file do dir=${file%/*}; cd $dir; echo $pwd; npm install; cd ${{env.home_working_directory}}; done' sh {} +
     - name: Install NPM Part 2
       run: cd ${{env.home_working_directory}}/Credibility-Development-Kit/metrics && find . -maxdepth 3 -name package.json -exec sh -c 'for file do dir=${file%/*}; cd $dir; echo $(pwd); npm install; cd ${{env.home_working_directory}}/Credibility-Development-Kit/metrics; done' sh {} +
+    - name: Run all check for the data
+      run: cd ${{env.home_working_directory}}/ci && node index.js
