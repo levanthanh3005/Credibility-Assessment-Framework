@@ -1,0 +1,9 @@
+
+docker build -t upsim-ci -f ./ci/Dockerfile .
+
+docker run -it --rm \
+-v $(pwd)/data:/todo/data \
+-v $(pwd)/ci/src:/todo/ci/src \
+-v $(pwd)/ci/index.js:/todo/ci/index.js \
+-w /todo/ci/  \
+upsim-ci sh

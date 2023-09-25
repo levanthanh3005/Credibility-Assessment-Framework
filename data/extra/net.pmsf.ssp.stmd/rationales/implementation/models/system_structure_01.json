@@ -1,0 +1,140 @@
+{
+    "elements": [
+        {
+            "name": "workplace",
+            "type": "System",
+            "source": "",
+            "subsystem": []
+        },
+        {
+            "name": "mouse",
+            "type": "Component",
+            "source": "./res/mouse.fmu",
+            "subsystem": ["workplace"]
+        },
+        {
+            "name": "computer",
+            "type": "System",
+            "source": "",
+            "subsystem": ["workplace"]
+        },
+        {
+            "name": "cpu_unit",
+            "type": "System",
+            "source": "",
+            "subsystem": ["workplace", "computer", "mainboard"]
+        },
+        {
+            "name": "cooling",
+            "type": "Component",
+            "source": "./res/cooling.fmu",
+            "subsystem": ["workplace", "computer", "mainboard", "cpu_unit"]
+        },
+        {
+            "name": "mainboard",
+            "type": "System",
+            "source": "",
+            "subsystem": ["workplace", "computer"]
+        },
+        {
+            "name": "cooling",
+            "type": "Component",
+            "source": "./res/cooling.fmu",
+            "subsystem": ["workplace", "computer"]
+        },
+        {
+            "name": "keyboard",
+            "type": "Component",
+            "source": "./res/keyboard.fmu",
+            "subsystem": ["workplace"]
+        }
+    ],
+    "connections": [
+        {
+            "subsystem": ["workplace"],
+            "element_start": "mouse",
+            "name_start": "usb_plug",
+            "element_end": "computer",
+            "name_end": "usb_1"
+        },
+        {
+            "subsystem": ["workplace"],
+            "element_start": "keyboard",
+            "name_start": "usb_plug",
+            "element_end": "computer",
+            "name_end": "usb_2"
+        },
+        {
+            "subsystem": ["workplace", "computer"],
+            "element_start": "",
+            "name_start": "usb_1",
+            "element_end": "mainboard",
+            "name_end": "io_1"
+        },
+        {
+            "subsystem": ["workplace", "computer"],
+            "element_start": "",
+            "name_start": "usb_2",
+            "element_end": "mainboard",
+            "name_end": "io_2"
+        },
+        {
+            "subsystem": ["workplace", "computer", "mainboard"],
+            "element_start": "",
+            "name_start": "io_2",
+            "element_end": "",
+            "name_end": "io_3"
+        }
+     ],
+    "connectors": [
+        {
+            "subsystem": ["workplace"],
+            "element": "mouse",
+            "name": "usb_plug",
+            "kind": "output",
+            "type": "Real"
+        },
+        {
+            "subsystem": ["workplace"],
+            "element": "keyboard",
+            "name": "usb_plug",
+            "kind": "output",
+            "type": "Real"
+        },
+        {
+            "subsystem": ["workplace"],
+            "element": "computer",
+            "name": "usb_1",
+            "kind": "input",
+            "type": "Real"
+        },
+        {
+            "subsystem": ["workplace"],
+            "element": "computer",
+            "name": "usb_2",
+            "kind": "input",
+            "type": "Real"
+        },
+        {
+            "subsystem": ["workplace", "computer"],
+            "element": "mainboard",
+            "name": "io_1",
+            "kind": "input",
+            "type": "Real"
+        },
+        {
+            "subsystem": ["workplace", "computer"],
+            "element": "mainboard",
+            "name": "io_2",
+            "kind": "input",
+            "type": "Real"
+        },
+        {
+            "subsystem": ["workplace", "computer"],
+            "element": "mainboard",
+            "name": "io_3",
+            "kind": "output",
+            "type": "Real"
+        }
+     ]
+}

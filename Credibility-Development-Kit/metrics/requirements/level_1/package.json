@@ -4,7 +4,7 @@
     "description": "level 1 quality metrics for requirements",
     "main": "index.js",
     "scripts": {
-      "test": "mocha --reporter spec",
+      "test": "mocha --reporter spec"
     },
     "author": "localhorst87",
     "license": "BSD-2-Clause",
