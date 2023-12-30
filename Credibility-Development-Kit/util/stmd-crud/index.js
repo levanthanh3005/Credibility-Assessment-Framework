@@ -1,6 +1,3 @@
 const { StmdReader } = require('./src/stmd_class');
 
-/**
- * 
- */
-exports.StmdReader = StmdReader;
+exports.StmdCrud = StmdReader;

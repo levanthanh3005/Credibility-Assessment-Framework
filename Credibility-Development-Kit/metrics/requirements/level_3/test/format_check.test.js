@@ -37,7 +37,7 @@ describe("Check ReqIF attributes", () => {
     it("test-3 :  all attributes are completed", ()=> {
         const reqIfModel = FileSync.readFileSync("./test/test_data/test-1.reqif", "utf8");
         
-        const resultLog = metrics.formatCheck(reqIfModel, ['Signee', 'Creator', 'Owner']);
+        const resultLog = metrics.formatCheck(reqIfModel, "['Signee', 'Creator', 'Owner']");
         
         const expectedOutput = {
             result : true,
@@ -50,7 +50,7 @@ describe("Check ReqIF attributes", () => {
     it("test-4 :  missing attributes", ()=> {
         const reqIfModel = FileSync.readFileSync("./test/test_data/test-1.reqif", "utf8");
         
-        const resultLog = metrics.formatCheck(reqIfModel, ['Signee', 'Creator', 'Id']);
+        const resultLog = metrics.formatCheck(reqIfModel, "['Signee', 'Creator', 'Id']");
         
         const expectedOutput = {
             result : false,

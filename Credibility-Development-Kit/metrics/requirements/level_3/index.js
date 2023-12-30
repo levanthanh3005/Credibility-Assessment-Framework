@@ -1,4 +1,5 @@
 const format_check = require("./src/format_check");
+
 /**
  * @module metrics/requirements/level_3
  */
@@ -19,11 +20,11 @@ const format_check = require("./src/format_check");
  * @modeltypes model type-independent
  * @level 3
  * @phase requirements
- * @step [models, parameters, environment, test Cases, integration]
- * @param {String} requirement raw string of ReqIF (2.0.x) ModelDescription
- * @param {Array}  attributesToCheck list of required attributes in the model file
+ * @step [models, parameters, environment, test cases, integration]
+ * @param {string} requirement raw string of ReqIF (2.0.x) file
+ * @param {string[]}  attributesToCheck list of required attributes in the model file
  * @returns {ResultLog} result and logging information
  */
-const formatCheck = format_check.formatCheck
+const checkRequirementCollectionFormat = format_check.formatCheck
 
-exports.formatCheck = formatCheck;
+exports.checkRequirementCollectionFormat = checkRequirementCollectionFormat;

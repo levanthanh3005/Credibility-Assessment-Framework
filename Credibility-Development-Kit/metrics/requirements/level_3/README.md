@@ -44,6 +44,7 @@ Interpretation          | A list of required attributes that each requirement ne
 Event                   | ReqIF schema is fulfilled. Optionally, all required attributes are contained in each single requirement
 Result                  | true
 Log                     | The requirement fulfills the given ReqIF schema. 
+
 (All required attributes are contained in the requirement). 
 
 || schema not valid

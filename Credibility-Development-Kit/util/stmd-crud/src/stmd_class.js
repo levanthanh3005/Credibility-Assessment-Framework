@@ -48,6 +48,7 @@ const {StmdWriter} = require('./stmd_writer');
  * @typedef {import('../types/internal_types').AvailableAnnotation} AvailableAnnotation 
  * @typedef {import('../types/internal_types').AvailableLifeCycleEntry} AvailableLifeCycleEntry 
  * @typedef {import('../types/internal_types').ContextEntry} ContextEntry 
+ * @typedef {import('../types/cdk_types').CredibilityType} CredibilityType
  */
 
 /**
@@ -459,6 +460,70 @@ exports.StmdReader = class StmdReader {
 
         return classifications.map(avilableClassification => avilableClassification.classification);
     }
+    
+    /**
+     * Add classifications to a specific location
+     * 
+     * @param {Classification} classification
+     * @param {string[]} location 
+     * @returns {boolean}
+     */
+    addClassification(classification, location) {
+        const availableClassifications = c2c_extractors.convertToAvailableClassifications([classification], location)
+        this.#superClassifications.push(...availableClassifications);
+
+        return true;
+    }
+
+    /**
+     * Adds a ClassificationEntry to the Classification with the given UID.
+     * 
+     * Returns true if the ClassificationEntry has been added successfully.
+     * 
+     * Returns false if the Classification, with the given UID does not exist. 
+     * 
+     * 
+     * @param {ClassificationEntry} classificationEntry 
+     * @param {string} classificationUid 
+     * @returns {boolean}
+     */
+    addClassificationEntry(classificationEntry, classificationUid) {
+        const idxClassification = this.#superClassifications.findIndex(avilableClassification => avilableClassification.uid === classificationUid);
+        
+        if (idxClassification > -1) {
+            if (this.#superClassifications[idxClassification].classification.ClassificationEntry !== undefined)
+                this.#superClassifications[idxClassification].classification.ClassificationEntry.push(classificationEntry);
+            else
+                this.#superClassifications[idxClassification].classification.ClassificationEntry = [classificationEntry];
+
+            return true;
+        }
+        else
+            return false;
+    }
+
+    /**
+     * Deletes the Classification with the given UID
+     * 
+     * @param {string} uid 
+     */
+    deleteClassification(uid) {
+        const idxClassification = this.#superClassifications.findIndex(availableClassification => availableClassification.uid === uid);
+        if (idxClassification < 0)
+            return false;
+
+        this.#superClassifications.splice(idxClassification, 1);
+        
+        return true;
+    }
+
+    // deleteClassificationEntry(classificationUid, entryUid) {
+
+    // }
+
+    // updateClassificationEntry(classificationUid, entryUid, newClassificationEntry) {
+
+    // }
 
     /**
      * Returns all Annotation elements (converted stc:Annotation) of a given parent element in the STMD, given
@@ -560,6 +625,28 @@ exports.StmdReader = class StmdReader {
         graph = graph_converter.addTitleToGraph(graph, link);
 
         return JSON.stringify(graph);
+    }
+
+    /**
+     * Returns a CredibilityType object from a cdk:Credibility element of a specific location
+     *  
+     * @param {string[]} location 
+     * @returns {CredibilityType}
+     */
+    getCdkElement(location) {
+        const credibility = this.#resources
+            .filter(availableResource => availableResource.location.toString() === location.toString())
+            .map(availableResource => availableResource.resource)
+            .filter(resource => resource.attributes.kind == "rationale")
+            .filter(resource => resource.Content !== undefined)
+            .filter(resource => resource.Content.any["cdk:Credibility"] !== undefined)
+            .map(resource => resource.Content.any["cdk:Credibility"])
+            .map(rawParsedCredibility => p2c_extractors.transformCdkCredibility(rawParsedCredibility));
+        
+        if (credibility.length > 0)
+            return credibility[0];
+        else 
+            return {Processing: [], Evidence: []};
     }
     
     /**
@@ -934,5 +1021,35 @@ exports.StmdReader = class StmdReader {
                 lifeCycleEntry: lifeCycleInformation[entryName]
             });
         }
+    }
+
+    /**
+     * Find all Rational Tag location
+     */
+    findAllParticleLocation(particleName) {
+        let locationList = [];
+        let phaseRawParsed, stepRawParsed, currentLocation;
+
+        // loop through all phases (stmd:AnalysisPhase, stmd:RequirementsPhase, ...)
+        const stmdPhaseNames = Object.keys(PHASE_TREE[ROOT_ELEMENT_NAME]);
+        for (let phase of stmdPhaseNames) {
+            phaseRawParsed = this.#stmdRawParsed[ROOT_ELEMENT_NAME][phase];
+            if (phaseRawParsed === undefined) continue;
+
+            currentLocation = [ROOT_ELEMENT_NAME, phase];
+            this.#addLinks(phaseRawParsed, currentLocation);
+
+            // loop through all steps of a phase (stmd:DefineModelRequirements, stmd:DefineParameterRequirements, ...)
+            const stmdStepNames = Object.keys(PHASE_TREE[ROOT_ELEMENT_NAME][phase]);
+            for (let step of stmdStepNames) {
+                stepRawParsed = phaseRawParsed[step];
+                if (stepRawParsed === undefined) continue;
+                if (stepRawParsed[particleName] == undefined) continue;
+                currentLocation = [ROOT_ELEMENT_NAME, phase, step, particleName];
+                // this.#addLinks(stepRawParsed, currentLocation);
+                locationList.push(currentLocation)
+            }
+        }
+        return locationList;
     }
 }

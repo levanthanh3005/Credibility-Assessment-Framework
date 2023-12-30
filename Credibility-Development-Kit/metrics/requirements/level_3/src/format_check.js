@@ -1,17 +1,18 @@
 const util = require("../../../../util/util-common");
+const path = require('path');
 
 exports.formatCheck = formatCheck;
-const SPEC_FILE = "./specification/reqif.xsd"
+const SPEC_FILE = "../specification/reqif.xsd"
 
 /**
  * Validate an ReqIF XML (at the string form) against XSD and also check required attribute list
  *
  * @author   lvtan3005
  * @param    {String} requirement           raw string of ReqIF (2.0.x) ModelDescription
- * @param    {Array}  attributesToCheck         list of required attributes in the model file
- * @return   {ResultLog}                        returns true/false upon valid/invalid signature
+ * @param    {String} [attributesToCheck]   stringified array of required attributes in the model file
+ * @return   {ResultLog}                    returns true/false upon valid/invalid signature
 */
-function formatCheck(requirement, attributesToCheck) {
+function formatCheck(requirement, attributesToCheck = '[]') {
     if (!util.validateXML(requirement)) {
         return {
             log : "The requirement does not implement the given ReqIF schema correctly, due to invalid XML structure",
@@ -19,14 +20,26 @@ function formatCheck(requirement, attributesToCheck) {
         };
     }
 
-    if (!util.validateXMLAgainstXSD(requirement, SPEC_FILE)) {
+    var specFile = path.resolve(__dirname+"/"+SPEC_FILE);
+    
+    if (!util.validateXMLAgainstXSD(requirement, specFile)) {
         return {
             log : "Parsing of Model Description not possible, due to invalid implementation according to the given XSD specification",
             result : false
         };
     }
 
-    if (attributesToCheck && attributesToCheck.length > 0) {
+    try {
+        attributesToCheck = JSON.parse(attributesToCheck.replaceAll("'","\""));
+    }
+    catch (err) {
+        return {
+            result: false,
+            log: "Could not parse the attribute list (" + err + ")"
+        };
+    }
+
+    if (attributesToCheck.length > 0) {
         var ckAttr = checkAttributesInModel(requirement, attributesToCheck);
         if (ckAttr.result == false) {
             return ckAttr
