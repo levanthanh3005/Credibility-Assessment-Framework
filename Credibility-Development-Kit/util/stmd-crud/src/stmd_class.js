@@ -10,7 +10,7 @@ const {
     LIFECYCLE_ENTRY_NAMES,
     GENERAL_INFORMATION_NAME } = require('./constants');
 
-const {StmdWriter} = require('./stmd_writer');
+const { StmdWriter } = require('./stmd_writer');
 
 /**
  * @typedef {import('../types/specification').SimulationTaskMetaDataAttributes} SimulationTaskMetaDataAttributes
@@ -172,7 +172,7 @@ exports.StmdReader = class StmdReader {
         stmdWriter.addResources(this.#resources);
         stmdWriter.addResourceReferences(this.#resourceReferences);
         stmdWriter.addLinks(this.#links);
-        
+
         return stmdWriter.export();
     }
 
@@ -211,7 +211,7 @@ exports.StmdReader = class StmdReader {
      * @param {boolean} [ingestSubElements=false] if true, all Resources from child elements will also be considered
      * @returns {AvailableResource[]} all Resources of the given location
      */
-    getResources(location, ingestSubElements = false) {        
+    getResources(location, ingestSubElements = false) {
         if (ingestSubElements) {
             // accesses the tree elements, based on the given location, like PHASE_TREE[ location[0] ][ location[1] ][...]
             let startTree = location.reduce((treeElement, xmlElement) => treeElement[xmlElement], PHASE_TREE);
@@ -232,10 +232,10 @@ exports.StmdReader = class StmdReader {
     addResource(resource, location) {
         if (this.#isResourceIdExisting(resource.attributes.id))
             return false;
-        
+
         const availableResource = c2c_extractors.convertToAvailableResources([resource], location);
         this.#resources.push(...availableResource);
-        
+
         return true;
     }
 
@@ -255,7 +255,7 @@ exports.StmdReader = class StmdReader {
 
         if (this.#isResourceIdExisting(resource.attributes.id))
             return false;
-        
+
         const availableResource = {
             uid: uid,
             location: location,
@@ -282,13 +282,13 @@ exports.StmdReader = class StmdReader {
         if (resourceId !== undefined) {
             const href = "#" + resourceId;
             const resourceRefs = this.#resourceReferences.filter(resourceRef => resourceRef.resourceReference.attributes.xlink_href == href);
-            for (let ref of resourceRefs) 
+            for (let ref of resourceRefs)
                 this.deleteResourceReference(ref.uid);
         }
 
         this.#resources.splice(idxRes, 1);
-        
-        return true;       
+
+        return true;
     }
 
     /**
@@ -327,10 +327,10 @@ exports.StmdReader = class StmdReader {
     addResourceReference(resourceReference, location) {
         if (this.#isResourceReferenceIdExisting(resourceReference.attributes.id))
             return false;
-        
+
         const availableResourceReference = c2c_extractors.convertToAvailableResourceReferences([resourceReference], location);
         this.#resourceReferences.push(...availableResourceReference);
-        
+
         return true;
     }
 
@@ -405,7 +405,7 @@ exports.StmdReader = class StmdReader {
         const idxLink = this.#links.findIndex(availableLink => availableLink.uid == uid);
         if (idxLink < 0)
             return false;
-        
+
         const availableLink = {
             uid: uid,
             location: location,
@@ -428,7 +428,7 @@ exports.StmdReader = class StmdReader {
             return false;
 
         this.#links.splice(idxLink, 1);
-        
+
         return true;
     }
 
@@ -460,7 +460,7 @@ exports.StmdReader = class StmdReader {
 
         return classifications.map(avilableClassification => avilableClassification.classification);
     }
-    
+
     /**
      * Add classifications to a specific location
      * 
@@ -489,7 +489,7 @@ exports.StmdReader = class StmdReader {
      */
     addClassificationEntry(classificationEntry, classificationUid) {
         const idxClassification = this.#superClassifications.findIndex(avilableClassification => avilableClassification.uid === classificationUid);
-        
+
         if (idxClassification > -1) {
             if (this.#superClassifications[idxClassification].classification.ClassificationEntry !== undefined)
                 this.#superClassifications[idxClassification].classification.ClassificationEntry.push(classificationEntry);
@@ -513,7 +513,7 @@ exports.StmdReader = class StmdReader {
             return false;
 
         this.#superClassifications.splice(idxClassification, 1);
-        
+
         return true;
     }
 
@@ -573,10 +573,10 @@ exports.StmdReader = class StmdReader {
     getResourceFromReference(resourceReference) {
         const targetId = util.getResourceIdFromHref(resourceReference.attributes.xlink_href);
         const targetResource = this.#resources.filter(availableRes => availableRes.resource.attributes.id == targetId);
-    
+
         if (targetResource.length == 0)
-            throw("Resource with id '" + targetId + "' does not exist");
-        
+            throw ("Resource with id '" + targetId + "' does not exist");
+
         return targetResource[0];
     }
 
@@ -590,7 +590,7 @@ exports.StmdReader = class StmdReader {
      */
     getResourceFromId(id) {
         return this.#resources
-            .find(availableRes => availableRes.resource.attributes.id === id);         
+            .find(availableRes => availableRes.resource.attributes.id === id);
     }
 
     /**
@@ -603,10 +603,10 @@ exports.StmdReader = class StmdReader {
      * @returns {string}                a JSON-LD named graph, as defined in
      *                                  https://www.w3.org/TR/json-ld/#named-graphs
      */
-    createGraphFromLink(link, context) {        
+    createGraphFromLink(link, context) {
         let graph = {
-            "@context": { },
-            "@graph": [ ]
+            "@context": {},
+            "@graph": []
         };
 
         for (let arc of link.Arc) {
@@ -642,13 +642,13 @@ exports.StmdReader = class StmdReader {
             .filter(resource => resource.Content.any["cdk:Credibility"] !== undefined)
             .map(resource => resource.Content.any["cdk:Credibility"])
             .map(rawParsedCredibility => p2c_extractors.transformCdkCredibility(rawParsedCredibility));
-        
+
         if (credibility.length > 0)
             return credibility[0];
-        else 
-            return {Processing: [], Evidence: []};
+        else
+            return { Processing: [], Evidence: [] };
     }
-    
+
     /**
      * Adds the top level information of the STMD file to the private property
      */
@@ -659,7 +659,7 @@ exports.StmdReader = class StmdReader {
     #extractGeneralInformation() {
         this.#generalInformation = p2c_extractors.extractGeneralInformation(this.#stmdRawParsed[ROOT_ELEMENT_NAME]);
     }
-    
+
     /**
      * Loops through all subelements of the given (sub-)phase tree and triggers the given collect function that is used
      * to collect assets
@@ -676,7 +676,7 @@ exports.StmdReader = class StmdReader {
     #collectRecursively(tree, location, collectFcn, collectSource, collector = []) {
         const newElements = collectFcn(location, collectSource);
         collector.push(...newElements);
-        
+
         let subelements = Object.keys(tree);
         while (subelements.length > 0) {
             let subLocation = subelements.shift();
@@ -695,7 +695,7 @@ exports.StmdReader = class StmdReader {
      */
     #collectResources(resourceLocation, allResources = this.#resources) {
         // remove possible whitespaces from element names    
-        resourceLocation = resourceLocation.map(elementName => elementName.trim());   
+        resourceLocation = resourceLocation.map(elementName => elementName.trim());
 
         return allResources.filter(res => res.location.toString() == resourceLocation.toString());
     }
@@ -709,7 +709,7 @@ exports.StmdReader = class StmdReader {
      */
     #collectResourceReferences(resReferenceLocation, allResReferences = this.#resourceReferences) {
         // remove possible whitespaces from element names    
-        resReferenceLocation = resReferenceLocation.map(elementName => elementName.trim());   
+        resReferenceLocation = resReferenceLocation.map(elementName => elementName.trim());
 
         return allResReferences
             .filter(availableResRef => availableResRef.location.toString() == resReferenceLocation.toString());
@@ -758,9 +758,9 @@ exports.StmdReader = class StmdReader {
             return false;
         else {
             return this.#resourceReferences
-            .filter(availRef => availRef.resourceReference.attributes.id !== undefined)
-            .filter(availRef => availRef.resourceReference.attributes.id === id)
-            .length() > 0;
+                .filter(availRef => availRef.resourceReference.attributes.id !== undefined)
+                .filter(availRef => availRef.resourceReference.attributes.id === id)
+                .length() > 0;
         }
     }
 
@@ -799,7 +799,7 @@ exports.StmdReader = class StmdReader {
                 for (let lcEntry of LIFECYCLE_ENTRY_NAMES) {
                     lcEntryRawParsed = stepRawParsed[LIFECYCLE_PARENT_NAME][lcEntry];
                     if (lcEntryRawParsed === undefined) continue;
-    
+
                     currentLocation = [ROOT_ELEMENT_NAME, phase, step, LIFECYCLE_PARENT_NAME, lcEntry];
                     this.#addResources(lcEntryRawParsed, currentLocation);
                     this.#addResourceReferences(lcEntryRawParsed, currentLocation);
@@ -904,7 +904,7 @@ exports.StmdReader = class StmdReader {
                 for (let lcEntry of LIFECYCLE_ENTRY_NAMES) {
                     lcEntryRawParsed = stepRawParsed[LIFECYCLE_PARENT_NAME][lcEntry];
                     if (lcEntryRawParsed === undefined) continue;
-    
+
                     currentLocation = [ROOT_ELEMENT_NAME, phase, step, LIFECYCLE_PARENT_NAME, lcEntry];
                     this.#addClassification(lcEntryRawParsed, currentLocation);
                     this.#addAnnotation(lcEntryRawParsed, currentLocation);
@@ -1008,11 +1008,11 @@ exports.StmdReader = class StmdReader {
      * @param {string[]} currentLocation 
      */
     #addLifeCycleEntries(phaseRawParsed, currentLocation) {
-         // extract LifeCycleInformationType; e.g. {Drafted: {...}, Validated: {...}, ... }
+        // extract LifeCycleInformationType; e.g. {Drafted: {...}, Validated: {...}, ... }
         let lifeCycleInformation = p2c_extractors.extractLifeCycleInformation(phaseRawParsed);
 
         // get array of available LifeCycleEntries, e.g. ["Drafted", "Validated"]
-        let lifeCycleEntryNames = Object.keys(lifeCycleInformation); 
+        let lifeCycleEntryNames = Object.keys(lifeCycleInformation);
 
         for (let entryName of lifeCycleEntryNames) {
             this.#lifeCycleEntries.push({
